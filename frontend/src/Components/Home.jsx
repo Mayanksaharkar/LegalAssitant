@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import Context from "../Context/Context";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Home() {
   const [file, setFile] = useState(null);
@@ -14,10 +15,17 @@ function Home() {
         <button
           className={`btn btn-primary ${file === null ? "btn-disabled" : ""}`}
           type='button'
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
-            upload(file);
-            navigateto("/summary");
+            const res = await upload(file);
+            console.log(res);
+            if (res === 200) {
+              toast.success("Document Uploaded!");
+              navigateto("/summary");
+            }
+            if (res === 500) {
+              toast.error("Something Went Wrong!");
+            }
           }}
         >
           Upload

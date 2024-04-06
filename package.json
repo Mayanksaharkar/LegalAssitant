@@ -3,6 +3,7 @@
     "start": "concurrently \"npm run dev --prefix frontend\" \"npm start --prefix backend\""
   },
   "dependencies": {
+    "chatgpt": "^5.2.5",
     "concurrently": "^8.2.2"
   }
 }

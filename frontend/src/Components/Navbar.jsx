@@ -36,7 +36,7 @@ function Navbar() {
               </li>
             </ul>
           </div>
-          <a className='btn btn-ghost text-2xl'>Legal Documnet Assistant</a>
+          <a className='btn btn-ghost text-2xl'>Legal Document Assistant</a>
         </div>
         <div className='navbar-end hidden '>
           <ul className='menu menu-horizontal px-1 gap-3'>

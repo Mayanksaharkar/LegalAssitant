@@ -4,6 +4,9 @@ const path = require('path');
 const fs = require('fs');
 const pdf = require('pdf-parse');
 const cors = require('cors')
+const OpenAI = require('openai')
+require('dotenv').config();
+
 
 
 const app = express();
@@ -11,7 +14,9 @@ app.use(express.json());
 app.use(cors())
 const uploadDir = path.join(__dirname, "uploads");
 
-// Check if the upload directory exists, create it if it doesn't
+
+
+
 
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -30,9 +35,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-const extractText = (path) => {
 
-}
 
 app.post('/upload', upload.single('file'), (req, res) => {
 
@@ -47,12 +50,38 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
     pdf(dataBuffer).then(function (data) {
         fs.unlinkSync(req.file.path)
+        console.log(typeof data.text)
         res.send(data.text)
     });
-
-
-
 });
+
+app.post('/simplify', async (req, res) => {
+
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI,
+    });
+    const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+            {
+                role: "user",
+                content: ` ${req.body.text} simplify this for a non legal professional in points  - give the response in markdown language`,
+            },
+        ],
+        temperature: 0.7,
+
+
+    });
+    const simpleText = completion.choices[0].message.content;
+
+    res.json({ simpleText: simpleText });
+    res.sendStatus(200)
+
+    // } catch (error) {
+    //     res.status(400);
+    //     res.send(error);
+    // }
+})
 
 
 
