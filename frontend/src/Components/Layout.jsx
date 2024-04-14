@@ -1,4 +1,4 @@
-import Navbar from "./Navbar";
+import NavBar from "./NavBar";
 import { Outlet } from "react-router-dom";
 import Modal from "./Modal";
 import { ToastContainer } from "react-toastify";
@@ -24,7 +24,7 @@ function Layout() {
 
       <div className='h-screen w-screen '>
         <div className='absolute top-4 z-20 w-full '>
-          <Navbar />
+          <NavBar />
         </div>
         <Outlet />
       </div>

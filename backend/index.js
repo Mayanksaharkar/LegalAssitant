@@ -7,15 +7,12 @@ const cors = require('cors')
 const OpenAI = require('openai')
 require('dotenv').config();
 
-
+let currFilePath = ""
 
 const app = express();
 app.use(express.json());
 app.use(cors())
 const uploadDir = path.join(__dirname, "uploads");
-
-
-
 
 
 if (!fs.existsSync(uploadDir)) {
@@ -42,45 +39,58 @@ app.post('/upload', upload.single('file'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
+    // console.log(req)
 
 
     console.log("File uploaded:", req.file.path);
 
+
     let dataBuffer = fs.readFileSync(req.file.path);
 
     pdf(dataBuffer).then(function (data) {
-        fs.unlinkSync(req.file.path)
+
         console.log(typeof data.text)
-        res.send(data.text)
+        res.json({ text: data.text, filePath: req.file.path })
     });
 });
 
 app.post('/simplify', async (req, res) => {
-
     const openai = new OpenAI({
         apiKey: process.env.OPENAI,
     });
-    const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-            {
-                role: "user",
-                content: ` ${req.body.text} simplify this for a non legal professional in points  - give the response in markdown language`,
-            },
-        ],
-        temperature: 0.7,
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "user",
+                    content: `${req.body.text} simplify this for a non legal professional in points  - give the response in markdown language`,
+                },
+            ],
+            temperature: 0.7,
+        });
+
+        const simpleText = completion.choices[0].message.content;
+
+        res.json({ simpleText: simpleText });
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
+app.get('/getFilePath', async (req, res) => {
+
+    if (currFilePath === null || currFilePath === "" || currFilePath === undefined) {
+        res.status(400);
+        res.send("file not found")
+    }
+    else {
+        res.json({ currFilePath: currFilePath })
+        res.sendStatus(200)
+    }
 
 
-    });
-    const simpleText = completion.choices[0].message.content;
-
-    res.json({ simpleText: simpleText });
-    res.sendStatus(200)
-
-    // } catch (error) {
-    //     res.status(400);
-    //     res.send(error);
-    // }
 })
 
 

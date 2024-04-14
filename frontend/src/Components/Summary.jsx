@@ -12,26 +12,22 @@ function Summary() {
         className='btn btn-primary'
         onClick={async (e) => {
           e.preventDefault();
-          // setIsLoading(true);
+
           const res = await simplifyText();
-          console.log(res);
+
           if (res === 500) {
-            toast.error("Data Not Found , Try Again");
-          }
-          if (res === 400) {
-            toast.error("Something Went Wrong!");
-          }
-          if (res === 200) {
-            toast.success("Document Simplified");
+            toast.info("Upload a file");
+          } else {
+            if (res === 200) {
+              toast.success("Simplified");
+            } else {
+              toast.error("Something Went Wrong");
+            }
           }
         }}
       >
         Simplify
       </button>
-
-      {/* <div className='text-white text-2xl p-5 w-[55%] h-min bg-base-300 rounded-2xl flex justify-center items-center'>
-        Loading...
-      </div> */}
 
       <div
         className={`${

@@ -7,6 +7,10 @@ import axios from "axios";
 function ContextProvider({ children }) {
   const [rawText, setRawText] = useState(null);
   const [simpleText, setSimpleText] = useState("");
+  const [filePath, setFilePath] = useState("");
+
+
+  
   const upload = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -22,9 +26,11 @@ function ContextProvider({ children }) {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        const res = await response.text();
+        const res = await response.json();
         // console.log(res);
-        setRawText(res);
+        setRawText(res.text);
+        setFilePath(res.filePath);
+        console.log("filePAthe:", filePath);
       })
 
       .catch((error) => {
@@ -39,7 +45,9 @@ function ContextProvider({ children }) {
   };
 
   const simplifyText = async () => {
-    if (rawText !== "" || undefined || null) {
+    if (rawText === undefined || rawText === null || rawText === "") {
+      return 500;
+    } else {
       try {
         const payload = {
           text: rawText,
@@ -59,9 +67,35 @@ function ContextProvider({ children }) {
       } catch (error) {
         return 400;
       }
-    } else {
-      return 500;
     }
+  };
+
+  const getFilePath = async () => {
+    try {
+      const response = await fetch("http://localhost:9000/getFilePath", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const res = await response.json();
+      if (response.status == 400) {
+        return 400;
+      } else {
+        if (response.status === 200) {
+          const res = await response.json();
+          return res.currFilePath;
+        } else {
+          return 500;
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      return 400;
+    }
+    // eslint-disable-next-line no-unreachable
+    return 400;
   };
 
   return (
@@ -70,6 +104,7 @@ function ContextProvider({ children }) {
         upload,
         simplifyText,
         simpleText,
+        getFilePath,
       }}
     >
       {children}

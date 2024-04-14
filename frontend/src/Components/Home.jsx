@@ -9,7 +9,10 @@ function Home() {
   const navigateto = useNavigate();
 
   return (
-    <div className='w-screen h-screen flex justify-center items-center align-middle bg-base-300 '>
+    <div className='w-screen h-screen  justify-center items-center align-middle bg-base-300 flex-col flex gap-5'>
+      <div className='text-4xl text-black '>
+        Upload Legal Document in PDF Format
+      </div>
       <div className='border border-primary rounded-xl p-10 h-min flex flex-col gap-7 justify-center align-middle items-center'>
         <input type='file' onChange={(e) => setFile(e.target.files[0])} />
         <button
@@ -18,7 +21,7 @@ function Home() {
           onClick={async (e) => {
             e.preventDefault();
             const res = await upload(file);
-            console.log(res);
+            
             if (res === 200) {
               toast.success("Document Uploaded!");
               navigateto("/summary");
