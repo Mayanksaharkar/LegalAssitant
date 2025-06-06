@@ -6,7 +6,7 @@ import {
   Typography,
   IconButton,
 } from "@material-tailwind/react";
-const NavBar = () => {
+const Header = () => {
   const [openNav, setOpenNav] = useState(false);
 
   const navList = (
@@ -100,4 +100,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default Header;

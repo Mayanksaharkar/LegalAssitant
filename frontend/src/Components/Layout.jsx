@@ -1,5 +1,5 @@
 import React from "react";
-import NavBar from "./NavBar";
+import Header from "./Header";
 import { Outlet } from "react-router-dom";
 import Modal from "./Modal";
 import { ToastContainer, Slide } from "react-toastify";
@@ -26,7 +26,7 @@ function Layout() {
 
       <div className="h-screen w-screen">
         <div className="absolute top-4 z-20 w-full">
-          <NavBar />
+          <Header />
         </div>
         <Outlet />
       </div>
