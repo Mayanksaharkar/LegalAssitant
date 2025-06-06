@@ -6,10 +6,11 @@ function GetStarted() {
     <div
       className=' py-12 lg:py-24 h-screen items-center w-screen flex justify-center align-middle '
       style={{
-        backgroundImage: 'url("../public/img1.jpg")',
+        backgroundImage: 'url("https://res.cloudinary.com/defcox81s/image/upload/v1749233823/img1_ohzzim.jpg")',
         backgroundSize: "cover",
         backgroundBlendMode: "hard-light",
         backgroundColor: "black",
+        lazyLoad: "true",
       }}
     >
       <div className='container backdrop-blur-xl shadow-2xl border border-base-100 max-w-[60%] py-7 rounded-xl flex flex-col items-center justify-center gap-4   md:px-6'>
