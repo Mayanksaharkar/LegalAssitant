@@ -61,8 +61,8 @@ function ContextProvider({ children }) {
           body: JSON.stringify(payload),
         });
         const res = await response.json();
-        console.log(res.simpleText);
-        setSimpleText(res.simpleText);
+        console.log(res.simplifiedText);
+        await  setSimpleText(res.simplifiedText);
         return 200;
       } catch (error) {
         return 400;

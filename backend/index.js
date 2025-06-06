@@ -1,101 +1,92 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const pdf = require('pdf-parse');
-const cors = require('cors')
-const OpenAI = require('openai')
-require('dotenv').config();
-
-let currFilePath = ""
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const pdf = require("pdf-parse");
+const cors = require("cors");
+require("dotenv").config();
+const { GoogleGenAI } = require("@google/genai");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(cors());
+
 const uploadDir = path.join(__dirname, "uploads");
 
-
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
 
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-    }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
 });
 
 const upload = multer({ storage });
 
+let documentText = "";
 
+app.post("/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
+  }
 
-app.post('/upload', upload.single('file'), (req, res) => {
+  let dataBuffer = fs.readFileSync(req.file.path);
 
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
-    // console.log(req)
-
-
-    console.log("File uploaded:", req.file.path);
-
-
-    let dataBuffer = fs.readFileSync(req.file.path);
-
-    pdf(dataBuffer).then(function (data) {
-
-        console.log(typeof data.text)
-        res.json({ text: data.text, filePath: req.file.path })
-    });
+  pdf(dataBuffer).then(function (data) {
+    documentText = data.text; 
+    res.json({ text: data.text, filePath: req.file.path });
+  });
 });
 
-app.post('/simplify', async (req, res) => {
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI,
+app.post("/simplify", async (req, res) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: "Please simplify the following text for a non professional (generate response only , no prefix , no suffix):\n\n" + req.body.text,
     });
-
-    try {
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: "user",
-                    content: `${req.body.text} simplify this for a non legal professional in points  - give the response in markdown language`,
-                },
-            ],
-            temperature: 0.7,
-        });
-
-        const simpleText = completion.choices[0].message.content;
-
-        res.json({ simpleText: simpleText });
-    } catch (error) {
-        res.status(400).send(error);
-    }
+    res.json({ simplifiedText: response.text });
+  } catch (error) {
+    console.error("Error simplifying text:", error);
+    res.status(500).send("Error simplifying text");
+  }
 });
 
-app.get('/getFilePath', async (req, res) => {
+app.get("/getFilePath", async (req, res) => {
+  if (!currFilePath) {
+    res.status(400).send("File not found");
+  } else {
+    res.json({ currFilePath: currFilePath });
+  }
+});
 
-    if (currFilePath === null || currFilePath === "" || currFilePath === undefined) {
-        res.status(400);
-        res.send("file not found")
+app.post("/chat", async (req, res) => {
+  try {
+    if (!documentText) {
+      return res.status(400).send("No document uploaded for reference.");
     }
-    else {
-        res.json({ currFilePath: currFilePath })
-        res.sendStatus(200)
-    }
 
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      role: "assistant",
+      contents: `You are a legal assistant. Answer the user's question based on the legal document provided. If you don't have enough information, say "I don't know".\n\nLegal Document:\n\n${documentText}\n\nUser's Question:\n\n${req.body.question}`,
+    });
 
-})
+    res.json({ answer: response.text });
+  } catch (error) {
+    console.error("Error processing chat request:", error);
+    res.status(500).send("Error processing chat request");
+  }
+});
 
-
-
-const PORT = process.env.PORT || 8090;
+const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
