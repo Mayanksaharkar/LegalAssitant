@@ -8,7 +8,6 @@ function Summary() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log("Summa: ", simpleText);
   }, [simpleText]);
 
   const handleSimplify = async (e) => {

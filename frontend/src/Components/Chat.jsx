@@ -22,7 +22,7 @@ function Chat() {
         navigate("/home");
       }
     }
-  }, [rawText, navigate, toastShown]);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -32,7 +32,7 @@ function Chat() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await axios.post("http://localhost:9000/chat", {
+      const response = await axios.post("https://legalassitant.onrender.com/chat", {
         question: input,
       });
       setInput("");

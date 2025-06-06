@@ -1,9 +1,6 @@
-/* eslint-disable no-unused-vars */
 import Context from "./Context";
 import { useState } from "react";
-import axios from "axios";
-
-// eslint-disable-next-line react/prop-types
+const url = "https://legalassitant.onrender.com"
 function ContextProvider({ children }) {
   const [rawText, setRawText] = useState(null);
   const [simpleText, setSimpleText] = useState("");
@@ -18,19 +15,16 @@ function ContextProvider({ children }) {
     const options = {
       method: "POST",
       body: formData,
-      // Set content-type header for FormData
     };
 
-    fetch("http://localhost:9000/upload", options)
+    fetch(`${url}/upload`, options)
       .then(async (response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const res = await response.json();
-        // console.log(res);
         setRawText(res.text);
         setFilePath(res.filePath);
-        console.log("filePAthe:", filePath);
       })
 
       .catch((error) => {
@@ -53,7 +47,7 @@ function ContextProvider({ children }) {
           text: rawText,
         };
 
-        const response = await fetch("http://localhost:9000/simplify", {
+        const response = await fetch(`${url}/simplify`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -61,7 +55,6 @@ function ContextProvider({ children }) {
           body: JSON.stringify(payload),
         });
         const res = await response.json();
-        console.log(res.simplifiedText);
         await  setSimpleText(res.simplifiedText);
         return 200;
       } catch (error) {
@@ -72,7 +65,7 @@ function ContextProvider({ children }) {
 
   const getFilePath = async () => {
     try {
-      const response = await fetch("http://localhost:9000/getFilePath", {
+      const response = await fetch(`${url}/getFilePath`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -94,8 +87,6 @@ function ContextProvider({ children }) {
       console.log(e);
       return 400;
     }
-    // eslint-disable-next-line no-unreachable
-    return 400;
   };
 
   return (

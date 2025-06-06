@@ -9,7 +9,6 @@ function App() {
     axios
       .post("http://localhost:3001/upload", formData)
       .then((res) => {
-        console.log(res);
       })
       .catch((er) => console.log(er));
   };
